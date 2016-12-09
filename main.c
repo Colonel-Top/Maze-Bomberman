@@ -59,8 +59,8 @@ void pop();
 void push(int x,int y)
 {
 	top = top+1;
-	stackx[pop] = x;
-	stacky[pop] = y;
+	stackx[top] = x;
+	stacky[top] = y;
 }
 void pop()
 {
@@ -135,10 +135,61 @@ void rannewc()
             }
         }
 }
-
+void checknb()
+{
+	int possiblemove[4][3] = {0,0};
+	for(int a = 0 ; a < 4 ; a++)
+	{
+		for(int b = 0 ; b < 2 ; b++)
+		{
+			if(maze[fc_x+1][fc_y] == 0)
+			{
+				possiblemove[a][0] = fc_x;
+				possiblemove[a][1] = fc_y;
+				possiblemove[a][2] = 1;
+				continue;
+			}
+			if(maze[fc_x-1][fc_y] == 0)
+			{
+				possiblemove[a][0] = fc_x;
+				possiblemove[a][1] = fc_y;
+				possiblemove[a][2] = 1;
+				continue;
+			}
+			if(maze[fc_x][fc_y+1] == 0)
+			{
+				possiblemove[a][0] = fc_x;
+				possiblemove[a][1] = fc_y;
+				possiblemove[a][2] = 1;
+				continue;
+			}
+			if(maze[fc_x][fc_y-1] == 0)
+			{
+				possiblemove[a][0] = fc_x;
+				possiblemove[a][1] = fc_y;
+				possiblemove[a][2] = 1;
+				continue;
+			}
+		}
+	}//Check nieghbor possible moves
+	void randomway()
+	{
+		int randomtogo = rand()%4;
+		if(possiblemove[randomtogo][2] == 1 )
+		{
+			push(possiblemove[randomtogo][0],possiblemove[randomtogo][1]);
+		}
+		else
+			randomway();
+	}
+	randomway();
+	fc_x = possiblemove[randomtogo][0];
+	fc_y = possiblemove[randomtogo][1];
+}
 void mazeinitial()
 {
-    
+    maze[fc_x][fc_y] = 1; //Walked
+    checknb(); // done this line fc_x has fetch new position;
 }
 
 void showmaze()
@@ -166,5 +217,6 @@ void fetchmaze(int mazesize[rows][col])
     printf("fc_x = %d , fc_y = %d\n",fc_x,fc_y);
     //getch();
     puts("Start Initial maze");
+  
 	mazeinitial();
 }
