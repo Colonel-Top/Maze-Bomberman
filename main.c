@@ -35,7 +35,7 @@ int py = 1;
 int stat = 0;
 int walker = 0;
 int destination;
-int setbomb[1][1];
+int bombstatus =0;
 /*Declare Player pointer*/
 char character;
 char wall = '#';
@@ -173,9 +173,13 @@ void movemonster()
 }
 //////////////////////
 /* monster */
-
+     time_t start,end;
+double dif;
+     time_t start2,end2;
+double dif2;
 int main()
 {
+
     // printf("TopX = %d\n",topx);
     srand(time(NULL));
     char name[26];
@@ -268,7 +272,7 @@ int playg()
                 if(maze[x][y] == wall)
                     --y;
                 break;
-            case ' ':
+            case 32 :
                 plantbomb(x,y);
                 break;
             default:
@@ -283,8 +287,8 @@ int playg()
                 break;
             }
         }
-        breakpoint:
-     
+breakpoint:
+
         //	movemonster();
         fetchmaze(1);
         clearscreen();
@@ -466,11 +470,26 @@ void fetchmaze(int isspaces)
         for(int j = 0 ; j < col ; j++)
         {
 
-            if(i == mons[i].posx && j == mons[i].posy && i < monssize && mons[i].status == 1)
+          /*  if(i == mons[i].posx && j == mons[i].posy && i < monssize && mons[i].status == 1)
             {
                 printf("%c",monssymbol);
                 //printf("");
+            }*/
+            if(maze[i][j] == '+')
+            {
+                 printf("@");
+                 dif = difftime (end,start);
+                time (&end);
+                if(dif == 2)
+                {
+                    maze[i][j] = '0';
+                    time (&start2);
+                    maze[i][j] = '!';
+                    bombstatus--;
+                }
+
             }
+
             else if(i == x && j == y)
                 printf("%c",character);
             else if(maze[i][j] != '0')
@@ -491,7 +510,7 @@ int generate(int row,int col)
 {
     //fetchmaze(6);
     //  printf("Current PX =  %d PY = %d \n",px,py);
-     //getchar();
+    //getchar();
     /*for(int i = 0 ; i < topx ; i++)
         {
             printf("[STACKX] = %d [STACKY] = %d TOPXY = %d\n",stackx[i],stacky[i],topx);
@@ -686,22 +705,16 @@ void clearscreen() //MY TEACHER SUGGESTED ME THIS CODE TO "CLEAR" THE SCREEN
 
 void plantbomb(int posx,int posy)
 {
-    if(setbomb[0][0] != 'o')
+    if(bombstatus == 0)
     {
-        setbomb[0][0] = 'o';
+        maze[posx][posy] = '+';
+        bombstatus++;
+        time (&start);
     }
-
-
-
-
-
-
-
 
 }
 
 
 
 
-
-/* End  Maze Function */
+    /* End  Maze Function */
