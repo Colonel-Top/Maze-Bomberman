@@ -23,7 +23,7 @@ void printmaze(int isspaces);
 void fetchmaze(int isspaces);
 int generate(int row,int col);
 void plantbomb(int posx,int posy);
-
+void textcolor(int color);
 /* End Declare Maze Function */
 //============//
 
@@ -34,14 +34,14 @@ int px = 1;
 int py = 1;
 int stat = 0;
 int walker = 0;
-int destination;
+int destination ;
 int bombstatus =0;
 /*Declare Player pointer*/
 char character;
 char wall = '#';
 int x;
 int y;
-int hp;
+float hp;
 /* End Declare Size */
 //============//
 
@@ -98,37 +98,40 @@ void movemonster();
 void randomspawn();
 void randomspawn()
 {
-    int possx[25] = {0};
-    int possy[25] = {0};
+    int possx[200] = {0};
+    int possy[200] = {0};
     int walk = 0;
     for(int a = 1 ; a < row-1 ; a++)
     {
         for(int b = 1; b < col-1 ; b++)
         {
-            if(maze[a][b] == '0' && walk <= 25)
+            if(maze[a][b] == '0' && walk < 200 && maze[a+1][b] != character && maze[a-1][b] != character && maze[a][b+1] != character && maze[a][b-1] != character)
             {
                 possx[walk] = a;
                 possy[walk] = b;
-                printf("%d %d \n",possx[walk],possy[walk]);
+               // printf("%d %d \n",possx[walk],possy[walk]);
                 walk++;
             }
         }
     }
-    for(int a = 0 ; a < 5; a++)
+   // delay(3000);
+   // puts("===");
+  //  for(int a = 0 ; a < 5; a++)
     {
-        printf("%d %d\n",possx[a],possy[a]);
+  //      printf("%d %d\n",possx[a],possy[a]);
     }
-    //getchar();
+//
 
-    for(int a = 0 ; a < monssize ; a++)
+    for(int a = 0 ; a < walk ; a++)
     {
-        mons[a].posx = possx[a];
-        mons[a].posy = possy[a];
+        int tmp = rand()%30;
+        mons[a].posx = possx[tmp];
+        mons[a].posy = possy[tmp];
         mons[a].status = 1;
-        //printf("%d %d \n",possx[walk],possy[walk]);
-        //getchar();
+    //    printf("%d %d\n",mons[a].posx ,mons[a].posy);
     }
 
+//delay(20000);
 }
 
 void movemonster()
@@ -173,10 +176,12 @@ void movemonster()
 }
 //////////////////////
 /* monster */
-     time_t start,end;
+time_t start,end;
 double dif;
-     time_t start2,end2;
+time_t start2,end2;
 double dif2;
+time_t start3,end3;
+double dif3;
 int main()
 {
 
@@ -195,6 +200,7 @@ int playg()
     //getchar();
     printf("Input Maze Size : ");
     scanf("%d",&row);
+    hp = 100;
     //printf("%d",row);
     if(row %2 ==0)
         ++row;
@@ -212,8 +218,11 @@ int playg()
     //generate(row,col);
     //printf("[STACKX] = %d [STACKY] = %d TOPX  = %d\n",stackx[topx],stacky[topy],topx);
     //getchar();
+    puts("Please Wait Generating Maze");
+
+    delay(3000);
     generate(row,col);
-    randomspawn();
+randomspawn();
     // printf("TopX = %d\n",topx);
     //  generate(row,col);
     //  generate(row,col);
@@ -236,10 +245,15 @@ int playg()
     int isdone = 1;
     while(x!=0)
     {
+        if(hp <= 0)
+        {
+            hp =0;
+            break;
+        }
+
         // printf("TopX = %d\n",topx);
         ///  printf("[%d][%d]\n",row-1,destination);
         char key = '0';
-        delay(10);
         if(kbhit())
         {
             switch (key = getch())
@@ -278,7 +292,7 @@ int playg()
             default:
                 break;
             }
-            printf("HP : [%d]\n",hp);
+
             clearscreen();
             //system("cls");
             if((x == row-1 )&& (y== destination))
@@ -286,30 +300,20 @@ int playg()
                 isdone = 0;
                 break;
             }
+
         }
 breakpoint:
-
         //	movemonster();
         fetchmaze(1);
         clearscreen();
 
         //getchar();
     }
+
     system("cls");
     px=1;
     py=1;
-    printf("Do you want to Play again ? : Y/N \n");
-    char st = getch();
-    switch (st)
-    {
-    case 'Y':
-    case 'y':
-        return playg();
-        break;
-    case 'N':
-    case 'n':
-        exit(0);
-    }
+    gameover();
 }
 /* Stack Function  X */
 int popx()
@@ -465,31 +469,69 @@ void printmaze(int isspaces)
 }
 void fetchmaze(int isspaces)
 {
+   /* for(int i = 0 ; i < monssize ; i++)
+    {
+
+         printf("%d %d\n",mons[i].posx,mons[i].posy);
+
+    }*/
+    //delay(30000);
+    printf("HP : [%.f]\n",hp);
+    int status = 0;
+    static int isonbomb = 0;
     for(int i = 0 ; i < row ; i++)
     {
         for(int j = 0 ; j < col ; j++)
         {
 
-          /*  if(i == mons[i].posx && j == mons[i].posy && i < monssize && mons[i].status == 1)
-            {
+            if(maze[i][j] == monssymbol && i == mons[i].posx && j == mons[i].posy && mons[i].status == 1)
                 printf("%c",monssymbol);
-                //printf("");
-            }*/
-            if(maze[i][j] == '+')
+            else if(maze[i][j] == '!' && i==x && j==y )
             {
-                 printf("@");
-                 dif = difftime (end,start);
+                hp-=1;
+                printf("%c",character);
+            }
+            else if(maze[i][j] == '+')
+            {
+                printf("@");
                 time (&end);
+                dif = difftime (end,start);
                 if(dif == 2)
                 {
                     maze[i][j] = '0';
+
+                    for(int a = i-1 ; a <= i+1 ; a++)
+                    {
+                        for(int b = j-1 ; b <= j+1 ; b++)
+                        {
+                            if(maze[a][b] == '0')
+                            {
+                                maze[a][b] = '!';
+                            }
+                            //getchar();
+                        }
+                    }
                     time (&start2);
-                    maze[i][j] = '!';
-                    bombstatus--;
+                }
+            }
+            else if(maze[i][j] == '!' && 2 == difftime (time (&end2),start2))
+            {
+                for(int a = i-1 ; a <= i+1 ; a++)
+                {
+                    for(int b = j-1 ; b <= j+1 ; b++)
+                    {
+                        if(maze[a][b] == '!')
+                        {
+                            maze[a][b] = '0';
+                           // printf(" ");
+                        }
+                        //getchar();
+                    }
                 }
 
+                //maze[i][j] = '0';
+                bombstatus=0;
             }
-
             else if(i == x && j == y)
                 printf("%c",character);
             else if(maze[i][j] != '0')
@@ -558,16 +600,19 @@ int generate(int row,int col)
         }
         if(checker == 0)
         {
-            //printf("sp_peekx() = %d , y = %d \n",sp_peekx(),sp_peeky());
-            if(sp_peekx() != 0 && sp_peeky() != 0)
+            printf("sp_peekx() = %d , y = %d \n",sp_peekx(),sp_peeky());
+            //delay(2000);
+            if(sp_peekx() > 0 && sp_peeky() > 0)
             {
                 px = popx();
                 py = popy();
                 getpos();
             }
-            else if(sp_peekx() == 0 && sp_peeky() == 0 && topx == 1 )
+            else //if(sp_peekx() == 0 && sp_peeky() == 0 && topx == 1 )
             {
                 status = 1;
+                stackx[0] = 0;
+                stacky[0] = 0;
             }
 
         }
@@ -714,7 +759,49 @@ void plantbomb(int posx,int posy)
 
 }
 
+void gameover()
+{
+    int walker = 0;
+int destination =0 ;
+int bombstatus =0;
+    int i;
+    float hp = 0;
+over:
+    bombstatus = 0;
+    randomspawn();
+
+    system("color C");
+    printf("                    *              )            (     \n");
+    printf("   (       (     (  `          ( /(            )\\ )  \n");
+    printf("   )\ )    )\\    )\\))(  (      )\\())(   (  (  (()/(  \n");
+    printf("   (()/( ((((_)( ((_)()\\ )\\    ((_)\\ )\\  )\\ )\\  /(_)) \n");
+    printf("   /(_))_)\\ _ )\\(_()((_|(_)     ((_|(_)((_|(_)(_))   \n");
+    printf("   (_)) __ /_\\  |  \\/ || __|    / _ \\ \\ / /| __| _ \\  \n");
+    printf("    | (_ |/ _ \\ | |\\/| | _|    | (_) \\ V / | _||   /  \n");
+    printf("     \\___/_/ \\_\\|_|  |_|___|    \\___/ \\_/  |___|_|_\\  \n");
+
+    printf("\n\nDo you want to Play again ? : Y/N \n");
+    char st = getch();
+    switch (st)
+    {
+    case 'Y':
+    case 'y':
+        return playg();
+        break;
+    case 'N':
+    case 'n':
+        exit(0);
+    }
+
+}
+
+void score()
+{
+//    if(maze[i][j] == '!' )
 
 
 
-    /* End  Maze Function */
+}
+
+
+/* End  Maze Function */
