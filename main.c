@@ -124,7 +124,7 @@ void randomspawn()
 
     for(int a = 0 ; a < walk ; a++)
     {
-        int tmp = rand()%30;
+        int tmp = rand()%25;
         mons[a].posx = possx[tmp];
         mons[a].posy = possy[tmp];
         mons[a].status = 1;
@@ -469,23 +469,25 @@ void printmaze(int isspaces)
 }
 void fetchmaze(int isspaces)
 {
-   /* for(int i = 0 ; i < monssize ; i++)
+    delay(25);
+   /*for(int i = 0 ; i < monssize ; i++)
     {
 
          printf("%d %d\n",mons[i].posx,mons[i].posy);
 
     }*/
-    //delay(30000);
-    printf("HP : [%.f]\n",hp);
+    //delay(2000);
+    printf(" HP : [%.f]\n",hp);
     int status = 0;
     static int isonbomb = 0;
     for(int i = 0 ; i < row ; i++)
     {
         for(int j = 0 ; j < col ; j++)
         {
-
-            if(maze[i][j] == monssymbol && i == mons[i].posx && j == mons[i].posy && mons[i].status == 1)
+           if( mons[i].posx == i && j == mons[i].posy && mons[i].status == 1)
+           {
                 printf("%c",monssymbol);
+           }
             else if(maze[i][j] == '!' && i==x && j==y )
             {
                 hp-=1;
@@ -514,7 +516,7 @@ void fetchmaze(int isspaces)
                     time (&start2);
                 }
             }
-            else if(maze[i][j] == '!' && 2 == difftime (time (&end2),start2))
+            else if(maze[i][j] == '!' && 1 == difftime (time (&end2),start2))
             {
                 for(int a = i-1 ; a <= i+1 ; a++)
                 {
