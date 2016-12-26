@@ -343,21 +343,21 @@ reenter:
                 row = 12;
                 usersetrow = 12;
                 usersetcol = 12;
-                timeofplay = 20;
+                timeofplay = 25;
                 issetlevel = 1;
                 break;
             case 2:
                 row = 12;
                 usersetrow =  12;
                 usersetcol = 12;
-                timeofplay = 70;
+                timeofplay = 75;
                 issetlevel = 2;
                 break;
             case 3:
                 row = 13;
                 usersetrow =13;
                 usersetcol = 13;
-                timeofplay = 110;
+                timeofplay = 120;
                 issetlevel = 3;
                 break;
             }
