@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <conio.h>
+#include <dos.h>
 #include <stdlib.h>
 #include <windows.h>
 #include <time.h>
@@ -190,11 +191,13 @@ int main()
         {
         case KEY_DOWN:
             a++;
+            //prn("\a");
             if(a > 5)
                 a=5;
             break;
         case KEY_UP:
             a--;
+            //prn("\a");
             if(a < 1)
                 a=1;
             break;
@@ -202,7 +205,11 @@ int main()
             break;
         }
         if(send == 13)
+        {
+            prn("\a");
             break;
+        }
+
     }
     switch(menu)
     {
@@ -539,7 +546,7 @@ void mainofgame()
     prnline(3);
     prn("\t\t\t\tWelcome %s to Maze Survival\n\n");
     prnline(1);
-    prn("Please Wait while Maze Generate Prepare for Escape !\n\n");
+    prn("Please Wait while Maze Generate Prepare for Escape !\n\n ");
     prnline(1);
     delay(2800);
     character = name[0];
@@ -688,6 +695,9 @@ pointofchk:
                 break;
             case 32 :
                 plantbomb(x,y);
+                break;
+            case 27 :
+                main();
                 break;
             default:
                 break;
@@ -1366,6 +1376,7 @@ void plantbomb(int posx,int posy)
 
 void gameover()
 {
+
     if(isset == 0)
     {
         row = originalrow;
@@ -1394,7 +1405,7 @@ void gameover()
 over:
     bombstatus = 0;
     randomspawn();
-
+    prn("\a");
     system("color C");
     printf("                    *              )            (     \n");
     printf("   (       (     (  `          ( /(            )\\ )  \n");
