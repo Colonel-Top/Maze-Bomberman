@@ -6,9 +6,6 @@
 #include <time.h>
 #define MAX_STACK 500
 #define monssize 10
-//============//
-/* End Stack */
-//============/
 #define prn printf
 #define KEY_UP 72
 #define KEY_DOWN 80
@@ -17,26 +14,28 @@
 #define bomb O
 #define explode +
 #define PATH "highscore_ez.mazec"
-/* Declare Maze Function */
+
 void firstfetch();
-int playg();
 void clearscreen();
 void setpos(char pos);
 void printmaze(int isspaces);
 void fetchmaze(int isspaces);
-int generate(int row,int col);
 void plantbomb(int posx,int posy);
 void textcolor(int color);
 void config();
 void gohighscore_ez();
 void movemonster();
+void gameover();
+void prnline(int num);
+void mainofgame();
 void randomspawn();
-/* End Declare Maze Function */
-//============//
+void printlevel(int numin);
+int generate(int row,int col);
+int playg();
+/* Variable */
 int originalrow = 8;
 int originalcol =8;
 int isset = 0;
-/* Declare Size */
 char name[26];
 int row = 8;
 int col = 8;
@@ -51,30 +50,39 @@ int usersetrow = 0;
 int usersetcol = 0;
 int issetlevel = 0;
 int curscore =0;
-/*Declare Player pointer*/
 char character;
 char wall = '#';
 int x;
 int y;
 float hp;
-
-/* End Declare Size */
-//============//
-
-/* Declare Variable */
-void printlevel(int numin);
+/////////
+char maze[50][200];
+char lastwalk;
+char monssymbol = 146;
+int status =0;
+int firstwalk = 0;
+int tmpscore = 0;
+/////////
+/*STACK*/
 int topx = 0;
 int stackx[MAX_STACK];
 int topy = 0;
 int stacky[MAX_STACK];
-char maze[50][200];
-char lastwalk;
-int status =0;
-int firstwalk = 0;
 int sp_peekx();
 int sp_peeky();
-/* End DeclareVariable */
-char monssymbol = 146;
+////STACK FUNCTION ////
+void readscore();
+void writescore();
+int popx();
+void pushx(int value);
+int isfullx();
+int isemptyx();
+int p_peekx();
+int popy();
+void pushy(int value);
+int isfully();
+int isemptyy();
+int p_peeky();
 //============//
 struct scores
 {
@@ -85,30 +93,29 @@ struct scores
     int highscore_mid;
     int highscore_hard;
 } score;
-int tmpscore = 0;
-void readscore();
-void writescore();
-/* Stack */
-int popx();
-void pushx(int value);
-int isfullx();
-int isemptyx();
-int p_peekx();
-//
-int popy();
-void pushy(int value);
-int isfully();
-int isemptyy();
-int p_peeky();
-/////////////
+
+/*TIME*/
 time_t startmove,endmove;
 double difmove;
 double timeofplay = 30;
 time_t startplay,endplay;
 double difplay;
+time_t start,end;
+double dif;
+time_t start2,end2;
+double dif2;
+time_t start3,end3;
+double dif3;
+/*TIME*/
+struct monster
+{
+    int status;
+    int posx;
+    int posy;
+} mons[monssize];
+/*STRUCTURE OF MONS */
 int main()
 {
-
     int a=1,menu=1;
     char send='0';
     while(send != 13)
@@ -161,7 +168,7 @@ int main()
             system("color E");
             menu=3;
         }
-        printf("3.About  ");
+        printf("3.How to play  ");
         if(a==3)
             printf(" <===");
         printf("\n\n");
@@ -209,7 +216,6 @@ int main()
             prn("\a");
             break;
         }
-
     }
     switch(menu)
     {
@@ -218,6 +224,9 @@ int main()
         break;
     case 2:
         config();
+        break;
+    case 3:
+        howtoplay();
         break;
     case 4:
         gohighscore_ez();
@@ -230,26 +239,32 @@ int main()
 
     return 0;
 }
-
-
-/* Monster */
+void howtoplay()
+{
+    system("cls");
+    prnline(2);
+    prn("\n\n");
+    prn("\t\t\tHow to Play :\n\n");
+    prn("\t\tIn Maze they have monster Press Spacebar to place bomb \n\n\t\tIf you kill them you will got score\n\n");
+    prn("\t\tUse Arrow key to move yourself \n\n\t\tThe First Character of yourname will be as you in game\n\n");
+    prn("\t\tYou can use W A S D Key to move By \n\n\t\tW is UP A is Left S is DOWN and D is right\n\n");
+    prn("\t\tIf you Finish Maze your time will be get as bonus\n\n\t\tEach Monster have 10 Points Bonus\n\n");
+    prn("\t\tYour HP will decrease if you faild at bomb range \n\n\t\tHP left will be your score at the end\n\n");
+    prn("\t\t\t Press Any key to Main menu");
+    prn("\n\n");
+    prnline(2);
+    if(getch())
+        main();
+}
 void delay(int milliseconds)
 {
     long pause;
     clock_t now,then;
-
     pause = milliseconds*(CLOCKS_PER_SEC/1000);
     now = then = clock();
     while( (now-then) < pause )
         now = clock();
 }
-struct monster
-{
-    int status;
-    int posx;
-    int posy;
-} mons[monssize];
-
 void config()
 {
     int a=1,menu=1;
@@ -257,7 +272,6 @@ void config()
     while(send != 27)
     {
         system("cls");
-        system("color E");
         prnline(3);
         prn("\n\t\t\tWelcome To Configure page\n");
         prnline(3);
@@ -267,7 +281,6 @@ void config()
         if(a == 1)
         {
             printf("===>   ");
-            //system("color a");
             menu=1;
         }
         printf("Configure Maze Level ");
@@ -278,7 +291,6 @@ void config()
         if(a == 2)
         {
             printf("===>   ");
-            // system("color d");
             menu=2;
         }
         printf("Configure Monster Character ");
@@ -289,7 +301,6 @@ void config()
         if(a == 3)
         {
             printf("===>   ");
-            //system("color E");
             menu=3;
         }
         printf("Configure Maze Space ");
@@ -300,7 +311,6 @@ void config()
         if(a == 4)
         {
             printf("===>   ");
-            // system("color B");
             menu=4;
         }
         printf("Back to main Menu  ");
@@ -325,47 +335,53 @@ void config()
         if(send == 13)
             break;
     }
-    int tmps2=0;
-    int tmps3=0;
+    char tmps2=0;
+    char tmps3=0;
     switch(menu)
     {
     case 1:
 reenter:
         system("cls");
-        int tmp1 =0;
+        char tmp1 =0;
         prnline(3);
         prn("\n\t\t\t Configure Maze Level\n");
         prnline(3);
         prn("\n\n\t\t\t Select Level \n\n");
         printf("\t\t\t Easy (1)\n\n\t\t\t Medium (2) \n\n\t\t\t Hard (3) \n\n \t\t\t Enter Number : ");
-        scanf("%d",&tmp1);
+        scanf("%c",&tmp1);
         if(tmp1 <= 0 || tmp1 > 3 )
             goto reenter;
         else
         {
-
             switch(tmp1)
             {
-            case 1:
+            case '1':
                 row = 12;
                 usersetrow = 12;
                 usersetcol = 12;
                 timeofplay = 25;
                 issetlevel = 1;
                 break;
-            case 2:
+            case '2':
                 row = 12;
                 usersetrow =  12;
                 usersetcol = 12;
                 timeofplay = 75;
                 issetlevel = 2;
                 break;
-            case 3:
+            case '3':
                 row = 13;
                 usersetrow =13;
                 usersetcol = 13;
                 timeofplay = 120;
                 issetlevel = 3;
+                break;
+            default:
+                row = 12;
+                usersetrow = 12;
+                usersetcol = 12;
+                timeofplay = 25;
+                issetlevel = 1;
                 break;
             }
             isset = 1;
@@ -384,17 +400,16 @@ reenter2:
         prnline(3);
         prn("\n\n\t\t\t Select Monster Character\n\n");
         printf("\t\t\t %c (1)\n\n\t\t\t %c (2) \n\n\t\t\t %c (3) \n\n \t\t\t Enter Number : ",146,143,142);
-        scanf("%d",&tmps2);
-
+        scanf("%c",&tmps2);
         switch(tmps2)
         {
-        case 1:
+        case '1':
             monssymbol = 146;
             break;
-        case 2:
+        case '2':
             monssymbol = 143;
             break;
-        case 3:
+        case '3':
             monssymbol = 142;
             break;
         default:
@@ -418,13 +433,13 @@ reenter3:
 
         switch(tmps3)
         {
-        case 1:
+        case '1':
             valueofspace = 0;
             break;
-        case 2:
+        case '2':
             valueofspace = 1;
             break;
-        case 3:
+        case '3':
             valueofspace = 2;
             break;
         default:
@@ -459,7 +474,6 @@ void randomspawn()
             }
         }
     }
-
     // puts("===");
     for(int a = 0 ; a < walk ; a++)
     {
@@ -469,8 +483,6 @@ void randomspawn()
         mons[a].status = 1;
         //printf("%d %d\n",mons[a].posx,mons[a].posy);
     }
-
-//delay(20000);
 }
 
 void movemonster()
@@ -514,15 +526,7 @@ void movemonster()
     }
 }
 //////////////////////
-/* monster */
-time_t start,end;
-double dif;
-time_t start2,end2;
-double dif2;
-time_t start3,end3;
-double dif3;
-void gameover();
-void prnline(int num);
+
 void prnline(int num)
 {
     for(int i = 0 ; i < num ; i++)
@@ -530,23 +534,18 @@ void prnline(int num)
         printf("================================================================================\n");
     }
 }
-
-void mainofgame();
 void mainofgame()
 {
     srand(time(NULL));
     system("cls");
     prnline(3);
     printf("\n\n\t\t\t Please Insert Player Name : ");
-    // printf("\n\n");
-    // prnline(3);
-
     scanf("%s",name);
     system("cls");
     prnline(3);
     prn("\t\t\t\tWelcome %s to Maze Survival\n\n");
     prnline(1);
-    prn("Please Wait while Maze Generate Prepare for Escape !\n\n ");
+    prn("Please Wait while Maze Generate Prepare for Escape !\n\n");
     prnline(1);
     delay(2800);
     character = name[0];
@@ -555,7 +554,7 @@ void mainofgame()
 int playg()
 {
 beganplayg:
- time(&startplay);
+    time(&startplay);
     system("cls");
     if(isset == 0)
     {
@@ -567,13 +566,8 @@ beganplayg:
         row = usersetrow;
         col = usersetcol;
     }
-
     system("color a");
-    //getchar();
-    /*printf("Input Maze Size : ");
-    scanf("%d",&row);*/
     hp = 100;
-    //printf("%d",row);
     if(row %2 ==0)
         ++row;
     col = row;
@@ -595,9 +589,13 @@ beganplayg:
         col--;
         row--;
         break;
+     default:
+        col*=2;
+        row*=2;
+        col--;
+        row--;
+        break;
     }
-
-    //printf("row = %d col = %d\n",row,col);
     px = 1;
     py = 1;
     x = 1;
@@ -605,12 +603,7 @@ beganplayg:
     firstfetch();
     pushx(px);
     pushy(py);
-    //generate(row,col);
-    //printf("[STACKX] = %d [STACKY] = %d TOPX  = %d\n",stackx[topx],stacky[topy],topx);
-    //getchar();
     puts("Please Wait Generating Maze");
-
-    //  delay(3000);
     generate(row,col);
     fetchmaze(valueofspace);
     printf("\n\nPlease Check if Maze not have Exit \nPress R to Regenerate\nPress Enter to Play ... ");
@@ -629,11 +622,6 @@ pointofchk:
         break;
     }
     randomspawn();
-    // printf("TopX = %d\n",topx);
-    //  generate(row,col);
-    //  generate(row,col);
-    // printmaze(1);
-    // Done generate //
     void randomstart()
     {
         int start = rand()%col;
@@ -648,7 +636,7 @@ pointofchk:
     }
     randomstart();
     system("cls");
-     time(&startplay);
+    time(&startplay);
     int isdone = 1;
     while(x!=0)
     {
@@ -657,9 +645,6 @@ pointofchk:
             hp =0;
             break;
         }
-
-        // printf("TopX = %d\n",topx);
-        ///  printf("[%d][%d]\n",row-1,destination);
         char key = '0';
         if(kbhit())
         {
@@ -702,23 +687,17 @@ pointofchk:
             default:
                 break;
             }
-
             clearscreen();
-
             //system("cls");
             if((x == row-1 )&& (y== destination))
             {
                 isdone = 0;
                 break;
             }
-
         }
 breakpoint:
-        //	movemonster();
         fetchmaze(valueofspace);
         clearscreen();
-
-        //getchar();
     }
 
     system("cls");
@@ -734,11 +713,7 @@ int popx()
     {
 
         data = stackx[topx];
-        //stackx[topx] = 0;
-        //  printf("POP = %d\n",data);
         topx = topx - 1;
-        //    printf("[STACKX] = %d TOPX  = %d ",stackx[topx],topx);
-        // printf("will pop x = %d ",data);
         return data;
     }
     else
@@ -752,10 +727,8 @@ void pushx(int value)
 
     if(!isfullx())
     {
-        // maze[px][py] ='0';
         topx = topx + 1;
         stackx[topx] = value;
-        //printf("Pushx in = %d\n",value);
     }
     else
     {
@@ -797,10 +770,7 @@ int popy()
     if(!isemptyy())
     {
         data = stacky[topy];
-        // stacky[topy] = 0;
         topy = topy - 1;
-        //   printf("[STACKY] = %d TOPY  = %d\n",stacky[topx],topy);
-        // printf("POP = %d\n",data);
         return data;
     }
     else
@@ -816,8 +786,6 @@ void pushy(int value)
     {
         topy = topy + 1;
         stacky[topy] = value;
-        //printf("Pushy in = %d\n",value);
-
     }
     else
     {
@@ -880,14 +848,8 @@ void printmaze(int isspaces)
 }
 void fetchmaze(int isspaces)
 {
-   // delay(1000);
     system("color a");
-
-
-     // delay(1000);
     difmove = difftime(time (&endmove),startmove);
-    // printf("%.4f\n",difmove);
-    //delay(2000);
     if(timeofplay - difplay == 0)
     {
         system("cls");
@@ -895,18 +857,9 @@ void fetchmaze(int isspaces)
     }
     if((int)difmove == 1)
     {
-        //puts("1 Sec Move");
-        //delay(1000);
         movemonster();
         time(&startmove);
     }
-    /*     for(int i = 0 ; i < monssize ; i++)
-      {
-
-           printf("%d %d\n",mons[i].posx,mons[i].posy);
-
-      }
-     delay(1000);*/
     int status = 0;
     static int isonbomb = 0;
     for(int i = 0 ; i < row ; i++)
@@ -931,7 +884,6 @@ void fetchmaze(int isspaces)
                             {
                                 maze[a][b] = '!';
                             }
-                            //getchar();
                         }
                     }
                     time (&start2);
@@ -1070,7 +1022,7 @@ void fetchmaze(int isspaces)
             }
             else if(maze[i][j] == '!' && i==x && j==y )
             {
-                hp-=4;
+                hp-=10;
                 system("color c");
                 printf("%c",character);
             }
@@ -1083,64 +1035,61 @@ void fetchmaze(int isspaces)
                         if(maze[a][b] == '!')
                         {
                             maze[a][b] = '0';
-                            // printf(" ");
                         }
-                        //getchar();
                     }
                 }
-
-                //maze[i][j] = '0';
                 bombstatus=0;
             }
 
             else if(mons[0].posx == i && j == mons[0].posy && mons[0].status == 1)
             {
                 printf("%c",monssymbol);
-               // delay(25);
+                // delay(25);
             }
             else if(mons[1].posx == i && j == mons[1].posy && mons[1].status == 1)
             {
                 printf("%c",monssymbol);
-               // delay(25);
+                // delay(25);
             }
             else if(mons[2].posx == i && j == mons[0].posy && mons[2].status == 1)
             {
                 printf("%c",monssymbol);
-               // delay(25);
+                // delay(25);
             }
             else if(mons[3].posx == i && j == mons[3].posy && mons[3].status == 1)
             {
                 printf("%c",monssymbol);
-               // delay(25);
+                // delay(25);
             }
             else if(mons[4].posx == i && j == mons[4].posy && mons[4].status == 1)
             {
                 printf("%c",monssymbol);
-               // delay(25);
-            }else if(mons[5].posx == i && j == mons[5].posy && mons[5].status == 1)
+                // delay(25);
+            }
+            else if(mons[5].posx == i && j == mons[5].posy && mons[5].status == 1)
             {
                 printf("%c",monssymbol);
-               // delay(25);
+                // delay(25);
             }
             else if(mons[6].posx == i && j == mons[6].posy && mons[6].status == 1)
             {
                 printf("%c",monssymbol);
-               // delay(25);
+                // delay(25);
             }
             else if(mons[7].posx == i && j == mons[7].posy && mons[7].status == 1)
             {
                 printf("%c",monssymbol);
-               // delay(25);
+                // delay(25);
             }
             else if(mons[8].posx == i && j == mons[8].posy && mons[8].status == 1)
             {
                 printf("%c",monssymbol);
-               // delay(25);
+                // delay(25);
             }
             else if(mons[9].posx == i && j == mons[9].posy && mons[9].status == 1)
             {
                 printf("%c",monssymbol);
-               // delay(25);
+                // delay(25);
             }
             else if(i == x && j == y)
                 printf("%c",character);
@@ -1152,29 +1101,20 @@ void fetchmaze(int isspaces)
             {
                 printf(" ");
             }
-
         }
         printf("\n");
     }
     double tmpend = time(&endplay);
     difplay = (difftime (tmpend,startplay));
-    //printf("difplay = %.2f\n",difplay);
-    printf(" HP : [%.f] Damage : [%d] Timeleft : %.f \n",hp,curscore,timeofplay - difplay);
+    printf(" HP : [%.f] Monster Killed : [%d] Timeleft : %.f \n",hp,curscore,timeofplay - difplay);
 
     // printf("================================================\n");
 }
 int generate(int row,int col)
 {
-    //fetchmaze(6);
-    //  printf("Current PX =  %d PY = %d \n",px,py);
-    //getchar();
-    /*for(int i = 0 ; i < topx ; i++)
-        {
-            printf("[STACKX] = %d [STACKY] = %d TOPXY = %d\n",stackx[i],stacky[i],topx);
-        }*/
     firstwalk = 0;
     //("PEEK %d %d %d %d\n",p_peekx(),p_peeky(),topx,topy);
-    //  getchar();
+    // getchar();
     //printf("Current Cursor = (%d,%d)\n",px,py);
     stat = 0;
     char stackpossible[4]= {'0'};
@@ -1211,7 +1151,6 @@ int generate(int row,int col)
                 checker++;
             // printf("Checker is %d\n",checker);
             // getchar();
-
         }
         if(checker == 0)
         {
@@ -1229,11 +1168,8 @@ int generate(int row,int col)
                 stackx[0] = 0;
                 stacky[0] = 0;
             }
-
         }
     }
-
-
     getpos();
     char tmpchar[walker];
     for(int i = 0,j = 0; i  < 4 ; i++)
@@ -1258,7 +1194,6 @@ int generate(int row,int col)
         case 'D':
             if(maze[px+2][py] != '0')
             {
-
                 //       printf("px = %d =y = %d\n",px,py);
                 maze[px+1][py] ='0';
                 maze[px+2][py] ='0';
@@ -1271,7 +1206,6 @@ int generate(int row,int col)
         case 'U':
             if(maze[px-2][py] != '0')
             {
-
                 maze[px-1][py] ='0';
                 maze[px-2][py] ='0';
                 px-=2;
@@ -1284,7 +1218,7 @@ int generate(int row,int col)
             if(maze[px][py+2] != '0')
             {
                 //py+=2;
-                //        printf("px = %d =y = %d\n",px,py);
+                //printf("px = %d =y = %d\n",px,py);
                 maze[px][py+1] ='0';
                 maze[px][py+2] ='0';
                 py+=2;
@@ -1307,23 +1241,7 @@ int generate(int row,int col)
         }
     }
 
-    //  printf("Direction = %c \n",tmpchar[numwalk]);
-
-    // move
-
-    //move
     firstwalk++;
-    // printf("Firstwalk = %d\n",firstwalk);
-    // printf("Peek x = %d Peek y = %d\n",p_peekx(),p_peeky());
-    /* for(int i = 0 ; i < topx ; i++)
-     {
-         printf("[STACKX] = %d [STACKY] = %d TOPXY = %d\n",stackx[i],stacky[i],topx);
-     }*/
-    // printf("Current Cursor = (%d,%d)\n",px,py);
-
-
-
-    // printmaze(1);
     if(status == 1)
     {
 
@@ -1346,18 +1264,12 @@ int generate(int row,int col)
     }
     else
         generate(row,col);
-    //move
-
-
 }
-//	randoms();
-void clearscreen() //MY TEACHER SUGGESTED ME THIS CODE TO "CLEAR" THE SCREEN
+void clearscreen()
 {
     HANDLE hOut;
     COORD Position;
-
     hOut = GetStdHandle(STD_OUTPUT_HANDLE);
-
     Position.X = 0;
     Position.Y = 0;
     SetConsoleCursorPosition(hOut, Position);
@@ -1371,12 +1283,10 @@ void plantbomb(int posx,int posy)
         bombstatus++;
         time (&start);
     }
-
 }
 
 void gameover()
 {
-
     if(isset == 0)
     {
         row = originalrow;
@@ -1393,15 +1303,12 @@ void gameover()
         if(mons[chk].status == 0)
             left++;
     }
-
     tmpscore = left*10;
     tmpscore += ((difplay)*100)*0.2;
     tmpscore += hp*50;
     walker = 0;
     destination =0 ;
-
     int i;
-
 over:
     bombstatus = 0;
     randomspawn();
@@ -1415,7 +1322,6 @@ over:
     printf("   (_)) __ /_\\  |  \\/ || __|    / _ \\ \\ / /| __| _ \\  \n");
     printf("    | (_ |/ _ \\ | |\\/| | _|    | (_) \\ V / | _||   /  \n");
     printf("     \\___/_/ \\_\\|_|  |_|___|    \\___/ \\_/  |___|_|_\\  \n\n\n\n");
-
     // printf("\n\nDo you want to Play again ? : Y/N \n");
     prnline(2);
     delay(600);
@@ -1478,15 +1384,13 @@ chkswitchover:
     default:
         goto chkswitchover;
         break;
-
     }
-
 }
 void writescore()
 {
-
     FILE* fp;
     int count;
+    remove(PATH); // Rewrite File at All
     fp = fopen(PATH,"w++");
     if(fp == NULL)
     {
@@ -1494,12 +1398,9 @@ void writescore()
     }
     else
     {
-
         fwrite(&score,sizeof(score),1,fp);
-
     }
     fclose(fp);
-
 }
 void readscore()
 {
@@ -1530,7 +1431,7 @@ void printlevel(int numin)
 {
     switch (numin)
     {
-        case 0:
+    case 0:
     case 1:
         printf("Easy");
         break;
@@ -1538,7 +1439,7 @@ void printlevel(int numin)
         printf("Medium");
         break;
     case 3:
-         printf("Hard");
+        printf("Hard");
         break;
     default:
         break;
@@ -1567,3 +1468,4 @@ void gohighscore_ez()
         main();
     }
 }
+//End Coding
