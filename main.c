@@ -31,7 +31,7 @@ void mainofgame();
 void randomspawn();
 void printlevel(int numin);
 int generate(int row,int col);
-int playg();
+void playg();
 /* Variable */
 int originalrow = 8;
 int originalcol =8;
@@ -342,16 +342,13 @@ void config()
     case 1:
 reenter:
         system("cls");
-        char tmp1 =0;
+        char tmp1 ='0';
         prnline(3);
         prn("\n\t\t\t Configure Maze Level\n");
         prnline(3);
         prn("\n\n\t\t\t Select Level \n\n");
         printf("\t\t\t Easy (1)\n\n\t\t\t Medium (2) \n\n\t\t\t Hard (3) \n\n \t\t\t Enter Number : ");
         scanf("%c",&tmp1);
-        if(tmp1 <= 0 || tmp1 > 3 )
-            goto reenter;
-        else
         {
             switch(tmp1)
             {
@@ -429,7 +426,7 @@ reenter3:
         prnline(3);
         prn("\n\n\t\t\t Select Size of Maze Space\n\n");
         printf("\t\t\t Close (1)\n\n\t\t\t Medium (2) \n\n\t\t\t Wide (3) \n\n \t\t\t Enter Number : ");
-        scanf("%d",&tmps3);
+        scanf("%c",&tmps3);
 
         switch(tmps3)
         {
@@ -551,7 +548,7 @@ void mainofgame()
     character = name[0];
     playg();
 }
-int playg()
+void playg()
 {
 beganplayg:
     time(&startplay);
@@ -606,7 +603,7 @@ beganplayg:
     puts("Please Wait Generating Maze");
     generate(row,col);
     fetchmaze(valueofspace);
-    printf("\n\nPlease Check if Maze not have Exit \nPress R to Regenerate\nPress Enter to Play ... ");
+    printf("\n\nPlease Check if Maze not have Exit \nPress R to Regenerate\nPress ESC Back to menu \nPress Enter to Play ... ");
     time(&startmove);
 pointofchk:
     switch(getch())
@@ -614,6 +611,9 @@ pointofchk:
     case 'R':
     case 'r':
         goto beganplayg;
+        break;
+    case 27:
+        main();
         break;
     case 13:
         break;
@@ -1329,7 +1329,7 @@ over:
     delay(600);
     prn("= %d",left*=10);
     delay(600);
-    prn("\n\n\t\t\tTime x 100 ");
+    prn("\n\n\t\t\tTime x 100 with Bonus x0.2 ");
     delay(600);
     prn("= %d",((int)(ceil((timeofplay - difplay)*100)*0.2)));
     delay(600);
@@ -1338,9 +1338,27 @@ over:
     prn("= %d \n\n",(int)hp*50);
     delay(600);
     prn("\t\t\tYour Score is %d \n\n",tmpscore);
+    readscore();
+    bombstatus = 0;
+    switch(issetlevel)
+    {
+    case 0:
+    case 1:
+        timeofplay = 25;
+        break;
+    case 2:
+        timeofplay = 75;
+        break;
+    case 3:
+        timeofplay = 120;
+        break;
+    default:
+        timeofplay = 25;
+        break;
+    }
     if(tmpscore > score.highscore_ez)
     {
-        readscore();
+
         prn("Congratulation ! You beat %s with Score : %d \n\n Difficulty : ",score.name,tmpscore);
         printlevel(issetlevel);
         if(issetlevel == 1)
@@ -1369,6 +1387,8 @@ over:
     prnline(2);
     printf("\n\n Yes to Play again \n\n No to Quit and Go Back to main menu : Y/N >>> ");
     curscore = 0;
+    status =0;
+
 chkswitchover:
     switch (getch())
     {
